@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+@theme {
+  --color-troll-green: #00FF41;
+  --color-troll-dim: #00AA2E;
+  --color-troll-dark: #003D11;
+  --color-troll-bg: #0a0e0a;
+  --color-troll-card: #0d120d;
+  --color-troll-border: #1a2e1a;
+  --color-troll-warn: #FFB000;
+  --color-troll-bad: #FF3030;
+  --color-troll-cyan: #22D3EE;
+  --color-troll-purple: #A855F7;
+  --color-troll-orange: #FF6B35;
+  --color-troll-silver: #94A3B8;
+  --color-troll-gold: #FBBF24;
+  --font-family-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+}
+
+body {
+  background: var(--color-troll-bg);
+  color: var(--color-troll-green);
+  font-family: var(--font-family-mono);
+}
+
+/* CRT scanline effect */
+.crt::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0, 255, 65, 0.03) 3px,
+    rgba(0, 255, 65, 0.03) 4px
+  );
+  z-index: 1000;
+}
+
+/* Glow on hover */
+.glow-hover:hover {
+  text-shadow: 0 0 8px var(--color-troll-green);
+}
+
+/* Section headers */
+.section-header {
+  font-size: 0.75rem;
+  color: var(--color-troll-dim);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--color-troll-dark);
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Terminal panel */
+.panel {
+  background: var(--color-troll-card);
+  border: 1px solid var(--color-troll-border);
+  border-radius: 4px;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-troll-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-troll-dark);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-troll-dim);
+}
+
+::selection {
+  background: var(--color-troll-dark);
+  color: var(--color-troll-green);
+}
+
+/* Animations */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-blink {
+  animation: blink 1s step-end infinite;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.3s ease-out;
+}
+
+/* Positive/negative colors for price changes */
+.price-up { color: var(--color-troll-green); }
+.price-down { color: var(--color-troll-bad); }
