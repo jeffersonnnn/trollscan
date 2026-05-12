@@ -44,6 +44,8 @@ const rules = [
   { family: "ai", rule_type: "keyword", pattern: "zerebro", weight: 0.5 },
 
   { family: "ufo", rule_type: "regex", pattern: "uap|ufo|alien|disclosure|saucer|roswell|seti", weight: 1.0 },
+  { family: "ufo", rule_type: "keyword", pattern: "pursue", weight: 0.7 },
+  { family: "ufo", rule_type: "regex", pattern: "\\bpentagon\\b|\\barea.?51\\b", weight: 0.6 },
 
   { family: "charity", rule_type: "keyword", pattern: "unicef", weight: 1.0 },
   { family: "charity", rule_type: "keyword", pattern: "red cross", weight: 1.0 },
@@ -52,6 +54,28 @@ const rules = [
   { family: "charity", rule_type: "keyword", pattern: "pengu", weight: 0.6 },
 
   { family: "brainrot", rule_type: "regex", pattern: "tung|sahur|skibidi|wojak|chud|buttcoin", weight: 0.9 },
+
+  { family: "hanta", rule_type: "keyword", pattern: "virus", weight: 0.4 },
+  { family: "hanta", rule_type: "keyword", pattern: "pandemic", weight: 0.5 },
+  { family: "hanta", rule_type: "keyword", pattern: "plague", weight: 0.5 },
+  { family: "hanta", rule_type: "keyword", pattern: "quarantine", weight: 0.4 },
+
+  { family: "politifi", rule_type: "regex", pattern: "\\btrump\\b|\\bmelania\\b|politifi|\\bmaga\\b", weight: 1.0 },
+  { family: "politifi", rule_type: "regex", pattern: "\\bwar\\b|\\belection\\b|\\bpotus\\b|\\bpresident\\b", weight: 0.6 },
+  { family: "politifi", rule_type: "keyword", pattern: "burnie senders", weight: 0.8 },
+  { family: "politifi", rule_type: "keyword", pattern: "jeo boden", weight: 0.8 },
+  { family: "politifi", rule_type: "keyword", pattern: "doland tremp", weight: 0.8 },
+
+  { family: "aura", rule_type: "regex", pattern: "\\baura\\b", weight: 1.0 },
+  { family: "aura", rule_type: "keyword", pattern: "culture coin", weight: 0.8 },
+  { family: "aura", rule_type: "keyword", pattern: "aura maxxing", weight: 0.9 },
+
+  { family: "animal", rule_type: "regex", pattern: "\\bbonk\\b|\\bwif\\b|dogwifhat|popcat|\\bmew\\b", weight: 0.8 },
+  { family: "animal", rule_type: "regex", pattern: "\\bpenguin\\b|\\bpengu\\b|pudgy", weight: 0.7 },
+  { family: "animal", rule_type: "regex", pattern: "\\bdolan\\b|\\bduck\\b|\\bhippo\\b|moodeng|moo\\s*deng", weight: 0.7 },
+
+  { family: "satire", rule_type: "regex", pattern: "spx6900|\\buseless\\b|\\bparody\\b", weight: 0.8 },
+  { family: "satire", rule_type: "keyword", pattern: "satire", weight: 0.6 },
 ];
 
 const stmt = db.prepare(

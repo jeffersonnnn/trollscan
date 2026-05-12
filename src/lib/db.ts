@@ -202,12 +202,16 @@ export function getTokenCount(): number {
 
 const SEED_FAMILIES = [
   { name: "troll", label: "TROLL", color: "#00FF41", search_terms: "troll" },
-  { name: "hanta", label: "HANTA", color: "#FF6B35", search_terms: "hanta" },
+  { name: "hanta", label: "HANTA", color: "#FF6B35", search_terms: "hanta,virus,pandemic,plague" },
   { name: "goblin", label: "GOBLIN", color: "#A855F7", search_terms: "goblin" },
   { name: "ai", label: "AI", color: "#22D3EE", search_terms: "ai agent" },
-  { name: "ufo", label: "UFO", color: "#94A3B8", search_terms: "ufo,uap,alien" },
+  { name: "ufo", label: "UFO", color: "#94A3B8", search_terms: "ufo,uap,alien,disclosure,pursue" },
   { name: "charity", label: "CHARITY", color: "#FBBF24", search_terms: "charity" },
   { name: "brainrot", label: "BRAINROT", color: "#EF4444", search_terms: "brainrot,skibidi" },
+  { name: "politifi", label: "POLITIFI", color: "#DC2626", search_terms: "trump,melania,maga,politifi,war,election" },
+  { name: "aura", label: "AURA", color: "#8B5CF6", search_terms: "aura,culture coin,vibes" },
+  { name: "animal", label: "ANIMAL", color: "#10B981", search_terms: "bonk,wif,popcat,mew,pengu,dolan,moodeng" },
+  { name: "satire", label: "SATIRE", color: "#EC4899", search_terms: "spx6900,useless,parody,satire" },
 ];
 
 function seedDefaultFamilies(database: Database.Database): void {
