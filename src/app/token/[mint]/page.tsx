@@ -8,6 +8,7 @@ import { VelocityBadge } from "@/components/VelocityBadge";
 import { WhaleFlag } from "@/components/WhaleFlag";
 import type { Token } from "@/types";
 import { useFamilyMeta } from "@/lib/useFamilyMeta";
+import Footer from "@/components/Footer";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -199,9 +200,7 @@ export default function TokenPage({
         </div>
       </div>
 
-      <footer className="mt-auto border-t border-troll-border px-4 py-3 text-center text-[10px] text-troll-dark">
-        POWERED BY TROLLSCAN // TOKEN DETAIL
-      </footer>
+      <Footer label="TOKEN DETAIL" />
     </div>
   );
 }

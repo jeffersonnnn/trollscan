@@ -2,6 +2,7 @@
 
 import { Header } from "@/components/Header";
 import { PremiumGate } from "@/components/PremiumGate";
+import Footer from "@/components/Footer";
 
 export default function PremiumPage() {
   return (
@@ -49,9 +50,7 @@ export default function PremiumPage() {
         <PremiumGate />
       </div>
 
-      <footer className="border-t border-troll-border px-4 py-3 text-center text-[10px] text-troll-dark">
-        POWERED BY TROLLSCAN // PREMIUM FEATURES
-      </footer>
+      <Footer label="PREMIUM FEATURES" />
     </div>
   );
 }

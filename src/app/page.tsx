@@ -8,6 +8,7 @@ import { MetaWaves } from "@/components/MetaWaves";
 import { FamilyTabs } from "@/components/FamilyTabs";
 import { TokenTable } from "@/components/TokenTable";
 import { RadarFeed } from "@/components/RadarFeed";
+import Footer from "@/components/Footer";
 import { AdminBar } from "@/components/AdminBar";
 export default function Home() {
   const [activeFamily, setActiveFamily] = useState<string>("all");
@@ -60,9 +61,7 @@ export default function Home() {
         </div>
       </div>
 
-      <footer className="border-t border-troll-border px-4 py-3 text-center text-[10px] text-troll-dark">
-        POWERED BY TROLLSCAN // SOLANA MEMECOIN META TRACKER // v1.0
-      </footer>
+      <Footer />
     </div>
   );
 }

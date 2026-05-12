@@ -7,6 +7,7 @@ import { Header } from "@/components/Header";
 import { TokenTable } from "@/components/TokenTable";
 import type { Token } from "@/types";
 import { useFamilyMeta } from "@/lib/useFamilyMeta";
+import Footer from "@/components/Footer";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -83,9 +84,7 @@ export default function FamilyPage({
         <TokenTable family={family} />
       </div>
 
-      <footer className="border-t border-troll-border px-4 py-3 text-center text-[10px] text-troll-dark">
-        POWERED BY TROLLSCAN // {label} FAMILY VIEW
-      </footer>
+      <Footer label={`${label} FAMILY VIEW`} />
     </div>
   );
 }
