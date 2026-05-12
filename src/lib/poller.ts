@@ -2,14 +2,16 @@ import { fetchBoosted, fetchTokens, searchTokens } from "./dexscreener";
 import { fetchNewProfiles } from "./pumpfun";
 import { classifyToken } from "./families";
 import { computeVelocity, hasWhaleFlag } from "./velocity";
-import { upsertTokens, getTokenByMint } from "./db";
+import { upsertTokens, getTokenByMint, getSearchTerms } from "./db";
 import { emitter } from "./events";
+import { runAutoDetection } from "./auto-detect";
+import { runCtMonitor } from "./twitter";
 import type { Token, DexScreenerPair } from "@/types";
 
 const POLL_INTERVAL = parseInt(process.env.POLL_INTERVAL_MS ?? "30000", 10);
 const SEARCH_INTERVAL = 5 * 60 * 1000;
 const PUMP_INTERVAL = 60_000;
-const FAMILIES_TO_SEARCH = ["troll", "hanta", "goblin", "ai", "ufo", "brainrot"];
+const AUTO_DETECT_INTERVAL = parseInt(process.env.AUTO_DETECT_INTERVAL_MS ?? "300000", 10);
 const MIN_LIQUIDITY = 5_000;
 const MAX_MCAP_LIQ_RATIO = 500;
 
@@ -101,7 +103,8 @@ async function pollBoosted(): Promise<void> {
 }
 
 async function pollFamilySearch(): Promise<void> {
-  for (const family of FAMILIES_TO_SEARCH) {
+  const searchTerms = getSearchTerms();
+  for (const family of searchTerms) {
     try {
       const pairs = await searchTokens(family);
       const solanaPairs = pairs.filter(
@@ -158,6 +161,9 @@ async function pollNewProfiles(): Promise<void> {
 let primaryTimer: ReturnType<typeof setInterval> | null = null;
 let searchTimer: ReturnType<typeof setInterval> | null = null;
 let pumpTimer: ReturnType<typeof setInterval> | null = null;
+let autoDetectTimer: ReturnType<typeof setInterval> | null = null;
+let ctTimer: ReturnType<typeof setInterval> | null = null;
+const CT_INTERVAL = parseInt(process.env.CT_POLL_INTERVAL_MS ?? "600000", 10);
 
 export async function pollAll(): Promise<{ boosted: number; searched: number }> {
   let boosted = 0;
@@ -196,10 +202,25 @@ export function startPoller(): void {
     pumpTimer = setInterval(pollNewProfiles, PUMP_INTERVAL);
   }, 5_000);
 
+  setTimeout(() => {
+    runAutoDetection();
+    autoDetectTimer = setInterval(runAutoDetection, AUTO_DETECT_INTERVAL);
+  }, 30_000);
+
+  if (process.env.TWITTER_USERNAME) {
+    console.log(`[poller] CT monitor enabled (interval=${CT_INTERVAL}ms)`);
+    setTimeout(() => {
+      runCtMonitor();
+      ctTimer = setInterval(runCtMonitor, CT_INTERVAL);
+    }, 60_000);
+  }
+
   const cleanup = () => {
     if (primaryTimer) clearInterval(primaryTimer);
     if (searchTimer) clearInterval(searchTimer);
     if (pumpTimer) clearInterval(pumpTimer);
+    if (autoDetectTimer) clearInterval(autoDetectTimer);
+    if (ctTimer) clearInterval(ctTimer);
     console.log("[poller] Stopped");
   };
 

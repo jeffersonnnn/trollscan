@@ -1,52 +1,82 @@
 import type { FamilyName, FamilyRule, ClassificationResult } from "@/types";
-import type Database from "better-sqlite3";
+import { getDb, getFamilyRules } from "./db";
 
-interface RuleEntry {
-  family: FamilyName;
+export interface RuleEntry {
+  family: string;
   ruleType: "regex" | "keyword" | "mint_list";
   pattern: string;
   weight: number;
 }
 
-export const DEFAULT_RULES: RuleEntry[] = [
+const DEFAULT_RULES: RuleEntry[] = [
   { family: "troll", ruleType: "regex", pattern: "\\btroll\\b|trollface|trolling", weight: 1.0 },
   { family: "troll", ruleType: "regex", pattern: "tepe", weight: 0.6 },
   { family: "troll", ruleType: "regex", pattern: "trollina", weight: 0.8 },
   { family: "troll", ruleType: "regex", pattern: "totus", weight: 0.7 },
   { family: "troll", ruleType: "regex", pattern: "rage(guy)?", weight: 0.5 },
-
   { family: "hanta", ruleType: "regex", pattern: "hanta", weight: 1.0 },
   { family: "hanta", ruleType: "keyword", pattern: "hantavirus", weight: 1.0 },
   { family: "hanta", ruleType: "keyword", pattern: "outbreak", weight: 0.4 },
   { family: "hanta", ruleType: "keyword", pattern: "lockdown", weight: 0.5 },
-
   { family: "goblin", ruleType: "regex", pattern: "goblin", weight: 1.0 },
   { family: "goblin", ruleType: "keyword", pattern: "altman", weight: 0.6 },
   { family: "goblin", ruleType: "keyword", pattern: "openai", weight: 0.4 },
-
   { family: "ai", ruleType: "regex", pattern: "^ai|\\bai\\b", weight: 0.8 },
   { family: "ai", ruleType: "regex", pattern: "\\bagent\\b", weight: 0.6 },
   { family: "ai", ruleType: "keyword", pattern: "pippin", weight: 0.5 },
   { family: "ai", ruleType: "keyword", pattern: "fartcoin", weight: 0.5 },
   { family: "ai", ruleType: "keyword", pattern: "zerebro", weight: 0.5 },
-
   { family: "ufo", ruleType: "regex", pattern: "uap|ufo|alien|disclosure|saucer|roswell|seti", weight: 1.0 },
-
   { family: "charity", ruleType: "keyword", pattern: "unicef", weight: 1.0 },
   { family: "charity", ruleType: "keyword", pattern: "red cross", weight: 1.0 },
   { family: "charity", ruleType: "keyword", pattern: "st jude", weight: 1.0 },
   { family: "charity", ruleType: "keyword", pattern: "wish", weight: 0.7 },
   { family: "charity", ruleType: "keyword", pattern: "pengu", weight: 0.6 },
-
   { family: "brainrot", ruleType: "regex", pattern: "tung|sahur|skibidi|wojak|chud|buttcoin", weight: 0.9 },
 ];
+
+let cachedRules: RuleEntry[] | null = null;
+let rulesCachedAt = 0;
+const RULES_CACHE_TTL = 60_000;
+
+export function getActiveRules(): RuleEntry[] {
+  if (cachedRules && Date.now() - rulesCachedAt < RULES_CACHE_TTL) return cachedRules;
+
+  const dbRules = getFamilyRules();
+  const entries: RuleEntry[] = dbRules.map((r) => ({
+    family: r.family,
+    ruleType: r.rule_type as "regex" | "keyword" | "mint_list",
+    pattern: r.pattern,
+    weight: r.weight,
+  }));
+
+  const seen = new Set(entries.map((r) => `${r.family}:${r.pattern}`));
+  for (const rule of DEFAULT_RULES) {
+    if (!seen.has(`${rule.family}:${rule.pattern}`)) {
+      entries.push(rule);
+    }
+  }
+
+  cachedRules = entries;
+  rulesCachedAt = Date.now();
+  return entries;
+}
+
+export function invalidateRulesCache(): void {
+  cachedRules = null;
+  rulesCachedAt = 0;
+}
 
 function testRule(rule: RuleEntry, text: string): boolean {
   if (rule.ruleType === "keyword") {
     return text.includes(rule.pattern.toLowerCase());
   }
   if (rule.ruleType === "regex") {
-    return new RegExp(rule.pattern, "i").test(text);
+    try {
+      return new RegExp(rule.pattern, "i").test(text);
+    } catch {
+      return false;
+    }
   }
   return false;
 }
@@ -56,7 +86,7 @@ export function classifyToken(token: {
   name: string;
   description?: string;
 }): ClassificationResult {
-  return classifyWithRules(token, DEFAULT_RULES);
+  return classifyWithRules(token, getActiveRules());
 }
 
 export function classifyWithRules(
@@ -88,7 +118,7 @@ export function classifyWithRules(
     totalScore += score;
     if (score > maxScore) {
       maxScore = score;
-      maxFamily = family as FamilyName;
+      maxFamily = family;
     }
   }
 
@@ -100,26 +130,4 @@ export function classifyWithRules(
     family: maxFamily,
     confidence: totalScore > 0 ? maxScore / totalScore : 1.0,
   };
-}
-
-export function loadCustomRules(db: Database.Database): RuleEntry[] {
-  const rows = db
-    .prepare("SELECT * FROM family_rules WHERE active = 1")
-    .all() as FamilyRule[];
-
-  const custom: RuleEntry[] = rows.map((r) => ({
-    family: r.family as FamilyName,
-    ruleType: r.rule_type as "regex" | "keyword" | "mint_list",
-    pattern: r.pattern,
-    weight: r.weight,
-  }));
-
-  const seen = new Set(custom.map((r) => `${r.family}:${r.pattern}`));
-  for (const rule of DEFAULT_RULES) {
-    if (!seen.has(`${rule.family}:${rule.pattern}`)) {
-      custom.push(rule);
-    }
-  }
-
-  return custom;
 }

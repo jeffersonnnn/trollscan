@@ -2,8 +2,9 @@
 
 import useSWR from "swr";
 import { useEffect } from "react";
-import type { Token, FamilyName, SortField } from "@/types";
+import type { Token, SortField } from "@/types";
 import { TokenRow } from "./TokenRow";
+import { useFamilyMeta } from "@/lib/useFamilyMeta";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -11,9 +12,10 @@ export function TokenTable({
   family,
   sortBy = "velocity",
 }: {
-  family?: FamilyName | "all";
+  family?: string;
   sortBy?: SortField;
 }) {
+  const { getColor } = useFamilyMeta();
   const familyParam =
     family && family !== "all" ? `&family=${family}` : "";
   const url = `/api/tokens?sort=${sortBy}&limit=50${familyParam}`;
@@ -64,7 +66,7 @@ export function TokenTable({
       </div>
 
       {tokens.map((token, i) => (
-        <TokenRow key={token.mint} token={token} rank={i + 1} />
+        <TokenRow key={token.mint} token={token} rank={i + 1} getColor={getColor} />
       ))}
     </div>
   );

@@ -1,7 +1,7 @@
 import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
-import type { Token, FamilyRule, Alert, FamilyName, SortField, FamilyStats } from "@/types";
+import type { Token, FamilyRule, Alert, FamilyName, SortField, FamilyStats, FamilyMeta } from "@/types";
 
 let db: Database.Database | null = null;
 
@@ -67,7 +67,22 @@ export function getDb(): Database.Database {
     CREATE INDEX IF NOT EXISTS idx_tokens_mcap ON tokens(mcap DESC);
     CREATE INDEX IF NOT EXISTS idx_tokens_velocity ON tokens(velocity_score DESC);
     CREATE INDEX IF NOT EXISTS idx_tokens_age ON tokens(age_seconds);
+
+    CREATE TABLE IF NOT EXISTS families (
+      name TEXT PRIMARY KEY,
+      label TEXT NOT NULL,
+      color TEXT NOT NULL DEFAULT '#6B7280',
+      search_terms TEXT,
+      source TEXT DEFAULT 'seed',
+      auto_detected INTEGER DEFAULT 0,
+      created_at INTEGER NOT NULL,
+      active INTEGER DEFAULT 1
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_families_active ON families(active);
   `);
+
+  seedDefaultFamilies(db);
 
   return db;
 }
@@ -181,4 +196,93 @@ export function addAlert(alert: Omit<Alert, "id">): number {
 export function getTokenCount(): number {
   const row = getDb().prepare("SELECT COUNT(*) as count FROM tokens").get() as { count: number };
   return row.count;
+}
+
+// --- Family metadata (dynamic) ---
+
+const SEED_FAMILIES = [
+  { name: "troll", label: "TROLL", color: "#00FF41", search_terms: "troll" },
+  { name: "hanta", label: "HANTA", color: "#FF6B35", search_terms: "hanta" },
+  { name: "goblin", label: "GOBLIN", color: "#A855F7", search_terms: "goblin" },
+  { name: "ai", label: "AI", color: "#22D3EE", search_terms: "ai agent" },
+  { name: "ufo", label: "UFO", color: "#94A3B8", search_terms: "ufo,uap,alien" },
+  { name: "charity", label: "CHARITY", color: "#FBBF24", search_terms: "charity" },
+  { name: "brainrot", label: "BRAINROT", color: "#EF4444", search_terms: "brainrot,skibidi" },
+];
+
+function seedDefaultFamilies(database: Database.Database): void {
+  const existing = database.prepare("SELECT COUNT(*) as c FROM families").get() as { c: number };
+  if (existing.c > 0) return;
+
+  const stmt = database.prepare(
+    "INSERT OR IGNORE INTO families (name, label, color, search_terms, source, auto_detected, created_at, active) VALUES (?, ?, ?, ?, 'seed', 0, ?, 1)"
+  );
+  const now = Date.now();
+  for (const f of SEED_FAMILIES) {
+    stmt.run(f.name, f.label, f.color, f.search_terms, now);
+  }
+}
+
+export function getAllFamilyMeta(): FamilyMeta[] {
+  return getDb()
+    .prepare("SELECT * FROM families WHERE active = 1 ORDER BY created_at ASC")
+    .all() as FamilyMeta[];
+}
+
+export function getFamilyMeta(name: string): FamilyMeta | null {
+  return (
+    (getDb().prepare("SELECT * FROM families WHERE name = ?").get(name) as FamilyMeta | undefined) ?? null
+  );
+}
+
+export function upsertFamily(family: {
+  name: string;
+  label: string;
+  color: string;
+  search_terms: string | null;
+  source: string;
+}): void {
+  getDb()
+    .prepare(
+      `INSERT OR REPLACE INTO families (name, label, color, search_terms, source, auto_detected, created_at, active)
+       VALUES (?, ?, ?, ?, ?, ?, COALESCE((SELECT created_at FROM families WHERE name = ?), ?), 1)`
+    )
+    .run(
+      family.name, family.label, family.color, family.search_terms, family.source,
+      family.source === "auto_detected" ? 1 : 0,
+      family.name, Date.now()
+    );
+}
+
+export function getSearchTerms(): string[] {
+  const rows = getDb()
+    .prepare("SELECT search_terms FROM families WHERE active = 1 AND search_terms IS NOT NULL")
+    .all() as { search_terms: string }[];
+  const terms: string[] = [];
+  for (const row of rows) {
+    for (const t of row.search_terms.split(",")) {
+      const trimmed = t.trim();
+      if (trimmed) terms.push(trimmed);
+    }
+  }
+  return [...new Set(terms)];
+}
+
+export function getOtherTokensSince(sinceMs: number): Token[] {
+  return getDb()
+    .prepare("SELECT * FROM tokens WHERE family = 'other' AND first_seen_at > ?")
+    .all(sinceMs) as Token[];
+}
+
+export function reclassifyTokens(mints: string[], family: string): void {
+  const stmt = getDb().prepare("UPDATE tokens SET family = ? WHERE mint = ?");
+  const tx = getDb().transaction((items: string[]) => {
+    for (const m of items) stmt.run(family, m);
+  });
+  tx(mints);
+}
+
+export function getFamilyColor(name: string): string {
+  const row = getDb().prepare("SELECT color FROM families WHERE name = ?").get(name) as { color: string } | undefined;
+  return row?.color ?? "#6B7280";
 }

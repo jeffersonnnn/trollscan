@@ -5,7 +5,7 @@ import useSWR from "swr";
 import Link from "next/link";
 import type { Token } from "@/types";
 import { VelocityBadge } from "./VelocityBadge";
-import { FAMILY_COLORS } from "@/types";
+import { useFamilyMeta } from "@/lib/useFamilyMeta";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -53,6 +53,7 @@ export function RadarFeed() {
     { refreshInterval: 15_000 }
   );
 
+  const { getColor } = useFamilyMeta();
   const fresh = newest?.filter((t) => t.age_seconds < 86400).slice(0, 10) ?? [];
   const radar = tokens ?? [];
 
@@ -63,7 +64,7 @@ export function RadarFeed() {
           <div className="section-header">FRESH_DROPS // NEWEST</div>
           <div className="space-y-1 max-h-[250px] overflow-y-auto">
             {fresh.map((token) => {
-              const color = FAMILY_COLORS[token.family] ?? "#6B7280";
+              const color = getColor(token.family);
               return (
                 <div
                   key={`new-${token.mint}`}

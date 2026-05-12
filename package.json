@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@solana/web3.js": "^1.98.0",
+    "agent-twitter-client": "^0.0.18",
     "better-sqlite3": "^11.7.0",
     "clsx": "^2.1.1",
     "lightweight-charts": "^4.2.1",
@@ -21,7 +22,11 @@
     "swr": "^2.3.0"
   },
   "pnpm": {
-    "onlyBuiltDependencies": ["better-sqlite3", "esbuild", "sharp"]
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "esbuild",
+      "sharp"
+    ]
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.0",

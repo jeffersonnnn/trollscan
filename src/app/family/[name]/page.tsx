@@ -5,8 +5,8 @@ import Link from "next/link";
 import useSWR from "swr";
 import { Header } from "@/components/Header";
 import { TokenTable } from "@/components/TokenTable";
-import type { FamilyName, Token } from "@/types";
-import { FAMILY_COLORS, FAMILY_LABELS } from "@/types";
+import type { Token } from "@/types";
+import { useFamilyMeta } from "@/lib/useFamilyMeta";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -22,9 +22,10 @@ export default function FamilyPage({
   params: Promise<{ name: string }>;
 }) {
   const { name } = use(params);
-  const family = name.toLowerCase() as FamilyName;
-  const color = FAMILY_COLORS[family] ?? "#6B7280";
-  const label = FAMILY_LABELS[family] ?? name.toUpperCase();
+  const family = name.toLowerCase();
+  const { getColor, getLabel } = useFamilyMeta();
+  const color = getColor(family);
+  const label = getLabel(family);
 
   const { data: tokens } = useSWR<Token[]>(
     `/api/family/${family}`,

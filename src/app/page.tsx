@@ -8,10 +8,9 @@ import { MetaWaves } from "@/components/MetaWaves";
 import { FamilyTabs } from "@/components/FamilyTabs";
 import { TokenTable } from "@/components/TokenTable";
 import { RadarFeed } from "@/components/RadarFeed";
-import type { FamilyName } from "@/types";
-
+import { AdminBar } from "@/components/AdminBar";
 export default function Home() {
-  const [activeFamily, setActiveFamily] = useState<FamilyName | "all">("all");
+  const [activeFamily, setActiveFamily] = useState<string>("all");
   const [refreshing, setRefreshing] = useState(false);
   const { mutate } = useSWRConfig();
 
@@ -26,6 +25,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      <AdminBar />
       <Header />
       <Hero />
 

@@ -1,12 +1,4 @@
-export type FamilyName =
-  | "troll"
-  | "hanta"
-  | "goblin"
-  | "ai"
-  | "ufo"
-  | "charity"
-  | "brainrot"
-  | "other";
+export type FamilyName = string;
 
 export type SortField = "mcap" | "velocity" | "age";
 
@@ -121,7 +113,7 @@ export interface DexScreenerBoostToken {
 }
 
 export interface FamilyStats {
-  name: FamilyName;
+  name: string;
   token_count: number;
   total_mcap: number;
   total_volume: number;
@@ -131,26 +123,19 @@ export interface FamilyStats {
   top_velocity: number;
   freshest_token: string | null;
   freshest_age: number | null;
+  color?: string;
+  label?: string;
 }
 
-export const FAMILY_COLORS: Record<FamilyName, string> = {
-  troll: "#00FF41",
-  hanta: "#FF6B35",
-  goblin: "#A855F7",
-  ai: "#22D3EE",
-  ufo: "#94A3B8",
-  charity: "#FBBF24",
-  brainrot: "#EF4444",
-  other: "#6B7280",
-};
+export interface FamilyMeta {
+  name: string;
+  label: string;
+  color: string;
+  search_terms: string | null;
+  source: string;
+  auto_detected: number;
+  created_at: number;
+  active: number;
+}
 
-export const FAMILY_LABELS: Record<FamilyName, string> = {
-  troll: "TROLL",
-  hanta: "HANTA",
-  goblin: "GOBLIN",
-  ai: "AI",
-  ufo: "UFO",
-  charity: "CHARITY",
-  brainrot: "BRAINROT",
-  other: "OTHER",
-};
+export const DEFAULT_FAMILY_COLOR = "#6B7280";

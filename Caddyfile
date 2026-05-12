@@ -1,4 +1,4 @@
-trollscan.YOURDOMAIN.com {
-    reverse_proxy localhost:3000
+trollscan.bond {
+    reverse_proxy localhost:3800
     encode gzip
 }

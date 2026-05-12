@@ -7,7 +7,7 @@ import { Header } from "@/components/Header";
 import { VelocityBadge } from "@/components/VelocityBadge";
 import { WhaleFlag } from "@/components/WhaleFlag";
 import type { Token } from "@/types";
-import { FAMILY_COLORS } from "@/types";
+import { useFamilyMeta } from "@/lib/useFamilyMeta";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -91,7 +91,8 @@ export default function TokenPage({
     );
   }
 
-  const familyColor = FAMILY_COLORS[token.family] ?? "#6B7280";
+  const { getColor } = useFamilyMeta();
+  const familyColor = getColor(token.family);
   const pctClass = (n: number) => (n >= 0 ? "price-up" : "price-down");
   const fmtPct = (n: number) => `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 

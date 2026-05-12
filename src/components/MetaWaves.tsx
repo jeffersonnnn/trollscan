@@ -1,8 +1,8 @@
 "use client";
 
 import useSWR from "swr";
-import type { FamilyName, FamilyStats } from "@/types";
-import { FAMILY_COLORS } from "@/types";
+import type { FamilyStats } from "@/types";
+import { useFamilyMeta } from "@/lib/useFamilyMeta";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -22,11 +22,12 @@ function formatAge(seconds: number): string {
 export function MetaWaves({
   onSelect,
 }: {
-  onSelect: (family: FamilyName) => void;
+  onSelect: (family: string) => void;
 }) {
   const { data: families } = useSWR<FamilyStats[]>("/api/families", fetcher, {
     refreshInterval: 15_000,
   });
+  const { getColor } = useFamilyMeta();
 
   const active = families?.filter((f) => f.active_count > 0) ?? [];
 
@@ -43,7 +44,7 @@ export function MetaWaves({
       <div className="section-header">META_WAVES // ACTIVE_NARRATIVES</div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
         {active.map((f, i) => {
-          const color = FAMILY_COLORS[f.name] ?? "#6B7280";
+          const color = getColor(f.name);
           return (
             <button
               key={f.name}

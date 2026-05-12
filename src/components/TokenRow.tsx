@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import type { Token } from "@/types";
-import { FAMILY_COLORS } from "@/types";
+import { DEFAULT_FAMILY_COLOR } from "@/types";
 import { VelocityBadge } from "./VelocityBadge";
 import { WhaleFlag } from "./WhaleFlag";
 
@@ -47,8 +47,8 @@ function CopyCA({ mint }: { mint: string }) {
   );
 }
 
-export function TokenRow({ token, rank }: { token: Token; rank: number }) {
-  const familyColor = FAMILY_COLORS[token.family] ?? "#6B7280";
+export function TokenRow({ token, rank, getColor }: { token: Token; rank: number; getColor?: (name: string) => string }) {
+  const familyColor = getColor ? getColor(token.family) : DEFAULT_FAMILY_COLOR;
 
   return (
     <div className="grid grid-cols-[2rem_1fr_4rem_3rem_4rem_4rem_4rem_4rem_4rem_3rem_2rem_2rem] md:grid-cols-[2rem_1fr_4rem_3rem_5rem_5rem_4rem_4rem_4rem_3rem_2rem_2.5rem] gap-2 items-center px-4 py-2 text-xs hover:bg-troll-dark/30 transition-colors border-b border-troll-border/30 glow-hover">
